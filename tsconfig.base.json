@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
+    "declaration": true,
+    "declarationMap": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    "jsx": "preserve",
+    "noEmitOnError": true,
+    "noFallthroughCasesInSwitch": true,
+    "noImplicitOverride": true,
+    "noUncheckedIndexedAccess": true,
+    "paths": {
+      "@api/*": ["apps/api/src/*"],
+      "@web/*": ["apps/web/*"],
+      "@adaptive/shared": ["packages/shared/src/index.ts"],
+      "@adaptive/shared/*": ["packages/shared/src/*"],
+      "@adaptive/ai-engine": ["packages/ai-engine/src/index.ts"],
+      "@adaptive/ai-engine/*": ["packages/ai-engine/src/*"],
+      "@adaptive/speech": ["packages/speech/src/index.ts"],
+      "@adaptive/speech/*": ["packages/speech/src/*"]
+    },
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "strict": true,
+    "verbatimModuleSyntax": true
+  }
+}

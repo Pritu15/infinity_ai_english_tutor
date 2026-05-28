@@ -1,0 +1,13 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: dark;
+  --font-sans: "Inter";
+}
+
+body {
+  background: #080a0f;
+  color: #f5f1e8;
+}

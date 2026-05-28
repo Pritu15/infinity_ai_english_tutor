@@ -1,0 +1,245 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  LEARNER
+  TUTOR
+  ADMIN
+}
+
+enum CefrLevel {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+}
+
+enum AssessmentType {
+  DIAGNOSTIC
+  PLACEMENT
+  PROGRESS
+}
+
+enum LessonPlanStatus {
+  DRAFT
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+enum LessonSkill {
+  GRAMMAR
+  VOCABULARY
+  READING
+  LISTENING
+  WRITING
+  SPEAKING
+}
+
+enum LessonDifficulty {
+  A1
+  A2
+  B1
+  B2
+  C1
+  C2
+}
+
+enum ExerciseType {
+  MULTIPLE_CHOICE
+  SHORT_ANSWER
+  GRAMMAR_CORRECTION
+  ESSAY
+  LISTENING
+  SPEAKING
+  PRONUNCIATION
+}
+
+enum ConversationMode {
+  GENERAL
+  GRAMMAR_HELP
+  WRITING_CORRECTION
+  IELTS_INTERVIEW
+  SPEAKING_PRACTICE
+}
+
+enum NotificationType {
+  STREAK_MILESTONE
+  ASSESSMENT_COMPLETE
+  WEEKLY_PLAN_READY
+  INACTIVITY
+  SYSTEM
+}
+
+model User {
+  id                   String                @id @default(cuid())
+  email                String                @unique
+  passwordHash         String?
+  oauthProvider        String?
+  role                 UserRole              @default(LEARNER)
+  createdAt            DateTime              @default(now())
+  assessments          Assessment[]
+  conversationSessions ConversationSession[]
+  learnerProfile       LearnerProfile?
+  lessonPlans          LessonPlan[]
+  notifications        Notification[]
+  progressSnapshots    ProgressSnapshot[]
+  submissions          Submission[]
+  vocabularyItems      VocabularyItem[]
+}
+
+model LearnerProfile {
+  userId          String    @id
+  nativeLanguage  String
+  targetLevel     CefrLevel
+  learningGoal    String
+  learningStyle   String
+  preferredSkills String[]
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Assessment {
+  id              String         @id @default(cuid())
+  userId          String
+  type            AssessmentType
+  score           Float          @default(0)
+  grammarScore    Float          @default(0)
+  vocabularyScore Float          @default(0)
+  readingScore    Float          @default(0)
+  listeningScore  Float          @default(0)
+  writingScore    Float          @default(0)
+  speakingScore   Float          @default(0)
+  weaknesses      String[]
+  strengths       String[]
+  completedAt     DateTime?
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, completedAt])
+}
+
+model LessonPlan {
+  id          String           @id @default(cuid())
+  userId      String
+  generatedBy String
+  weekNumber  Int
+  skillFocus  String[]
+  status      LessonPlanStatus @default(DRAFT)
+  lessons     Lesson[]
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+}
+
+model Lesson {
+  id               String           @id @default(cuid())
+  planId           String
+  title            String
+  skill            LessonSkill
+  difficulty       LessonDifficulty
+  contentJson      Json
+  estimatedMinutes Int
+  embedding        LessonEmbedding?
+  exercises        Exercise[]
+  plan             LessonPlan       @relation(fields: [planId], references: [id], onDelete: Cascade)
+
+  @@index([planId])
+  @@index([skill, difficulty])
+}
+
+model Exercise {
+  id             String       @id @default(cuid())
+  lessonId       String
+  type           ExerciseType
+  prompt         String
+  expectedAnswer String?
+  rubric         Json
+  maxScore       Int
+  lesson         Lesson       @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+  submissions    Submission[]
+
+  @@index([lessonId])
+}
+
+model Submission {
+  id          String   @id @default(cuid())
+  exerciseId  String
+  userId      String
+  response    String?
+  audioUrl    String?
+  score       Float?
+  aiFeedback  Json?
+  submittedAt DateTime @default(now())
+  exercise    Exercise @relation(fields: [exerciseId], references: [id], onDelete: Cascade)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, submittedAt])
+  @@index([exerciseId])
+}
+
+model ConversationSession {
+  id           String           @id @default(cuid())
+  userId       String
+  mode         ConversationMode
+  messagesJson Json
+  startedAt    DateTime         @default(now())
+  endedAt      DateTime?
+  user         User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, startedAt])
+}
+
+model VocabularyItem {
+  id              String   @id @default(cuid())
+  userId          String
+  word            String
+  definition      String
+  exampleSentence String
+  masteryLevel    Int      @default(0)
+  nextReviewAt    DateTime
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, word])
+  @@index([userId, nextReviewAt])
+}
+
+model ProgressSnapshot {
+  id           String   @id @default(cuid())
+  userId       String
+  date         DateTime
+  overallScore Float
+  skillScores  Json
+  streakDays   Int
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, date])
+  @@index([userId, date])
+}
+
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  type      NotificationType
+  message   String
+  isRead    Boolean          @default(false)
+  createdAt DateTime         @default(now())
+  user      User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, isRead, createdAt])
+}
+
+model LessonEmbedding {
+  id        String                      @id @default(cuid())
+  lessonId  String                      @unique
+  embedding Unsupported("vector(1536)")
+  lesson    Lesson                      @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@index([lessonId])
+}

@@ -1,0 +1,35 @@
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: adaptive-ai-tutor-postgres
+    environment:
+      POSTGRES_DB: adaptive_tutor
+      POSTGRES_USER: adaptive
+      POSTGRES_PASSWORD: adaptive
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U adaptive -d adaptive_tutor"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "5433:5432"
+    volumes:
+      - adaptive_postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7-alpine
+    container_name: adaptive-ai-tutor-redis
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "6380:6379"
+    volumes:
+      - adaptive_redis_data:/data
+
+volumes:
+  adaptive_postgres_data:
+  adaptive_redis_data:

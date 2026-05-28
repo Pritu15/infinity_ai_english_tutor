@@ -1,0 +1,37 @@
+{
+  "name": "adaptive-ai-tutor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Adaptive AI Tutor for English Learning SaaS monorepo.",
+  "packageManager": "pnpm@9.15.4",
+  "engines": {
+    "node": ">=20.11.0",
+    "pnpm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "pnpm -r --sort build",
+    "db:generate": "prisma generate",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:dev": "prisma migrate dev",
+    "db:seed": "prisma db seed",
+    "lint": "pnpm -r --sort lint",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "pnpm -r --if-present test",
+    "typecheck": "pnpm -r --sort typecheck"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.28.0",
+    "@next/eslint-plugin-next": "^14.2.30",
+    "@types/node": "^22.15.23",
+    "eslint": "^9.28.0",
+    "prettier": "^3.5.3",
+    "prisma": "^6.9.0",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.33.1"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.9.0"
+  }
+}
