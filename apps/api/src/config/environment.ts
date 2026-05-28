@@ -13,6 +13,7 @@ export const environment = {
   jwtRefreshExpiresIn: process.env.JWT_REFRESH_EXPIRES_IN ?? "7d",
   jwtRefreshSecret: process.env.JWT_REFRESH_SECRET ?? "development-refresh-secret",
   nodeEnv: process.env.NODE_ENV ?? "development",
+  openAiApiKey: process.env.OPENAI_API_KEY ?? "",
   port: Number.parseInt(process.env.PORT ?? `${DEFAULT_PORT}`, 10),
   redisUrl: process.env.REDIS_URL ?? "redis://localhost:6380",
   refreshCookieName: "adaptive_refresh_token"

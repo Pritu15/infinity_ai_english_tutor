@@ -2,15 +2,21 @@ import { Router, type Router as ExpressRouter } from "express";
 import { AuthController } from "../controllers/auth.controller.js";
 import { asyncHandler } from "../middleware/async-handler.js";
 import { requireRole, validateJWT } from "../middleware/auth.middleware.js";
+import type { AuthService } from "../services/auth.service.js";
 
-const authController = new AuthController();
+export const createAuthRouter = (authService?: AuthService): ExpressRouter => {
+  const authController = new AuthController(authService);
+  const router: ExpressRouter = Router();
 
-export const authRouter: ExpressRouter = Router();
+  router.post("/auth/register", asyncHandler(authController.register));
+  router.post("/auth/login", asyncHandler(authController.login));
+  router.post("/auth/refresh", asyncHandler(authController.refresh));
+  router.post("/auth/logout", asyncHandler(authController.logout));
+  router.get("/auth/google", authController.googleRedirect);
+  router.get("/auth/google/callback", asyncHandler(authController.googleCallback));
+  router.get("/auth/me", validateJWT, requireRole(["LEARNER", "TUTOR", "ADMIN"]), authController.me);
 
-authRouter.post("/auth/register", asyncHandler(authController.register));
-authRouter.post("/auth/login", asyncHandler(authController.login));
-authRouter.post("/auth/refresh", asyncHandler(authController.refresh));
-authRouter.post("/auth/logout", asyncHandler(authController.logout));
-authRouter.get("/auth/google", authController.googleRedirect);
-authRouter.get("/auth/google/callback", asyncHandler(authController.googleCallback));
-authRouter.get("/auth/me", validateJWT, requireRole(["LEARNER", "TUTOR", "ADMIN"]), authController.me);
+  return router;
+};
+
+export const authRouter: ExpressRouter = createAuthRouter();

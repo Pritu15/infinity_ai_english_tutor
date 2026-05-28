@@ -1,5 +1,5 @@
 import jwt, { type JwtPayload, type SignOptions } from "jsonwebtoken";
-import { v4 as uuid } from "uuid";
+import { randomUUID } from "node:crypto";
 import { environment } from "../config/environment.js";
 import { HttpError } from "../middleware/error.middleware.js";
 import { StatusCodes } from "http-status-codes";
@@ -26,7 +26,8 @@ const signToken = (payload: object, secret: string, options: SignOptions): strin
 
 export class TokenService {
   createTokenPair(user: { email: string; id: string; role: string }): TokenPair {
-    const refreshJti = uuid();
+    // BUGFIX: use Node's native UUID generator so Jest does not load uuid's ESM-only build.
+    const refreshJti = randomUUID();
     const accessToken = signToken(
       {
         email: user.email,
@@ -34,12 +35,14 @@ export class TokenService {
       },
       environment.jwtAccessSecret,
       {
-        expiresIn: environment.jwtAccessExpiresIn,
+        // BUGFIX: jsonwebtoken's strict typings require the configured duration to match SignOptions.
+        expiresIn: environment.jwtAccessExpiresIn as SignOptions["expiresIn"],
         subject: user.id
       }
     );
     const refreshToken = signToken({}, environment.jwtRefreshSecret, {
-      expiresIn: environment.jwtRefreshExpiresIn,
+      // BUGFIX: jsonwebtoken's strict typings require the configured duration to match SignOptions.
+      expiresIn: environment.jwtRefreshExpiresIn as SignOptions["expiresIn"],
       jwtid: refreshJti,
       subject: user.id
     });

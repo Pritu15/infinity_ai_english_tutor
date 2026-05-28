@@ -14,9 +14,15 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "eslint .",
+    "test": "jest --runInBand",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
     "@adaptive/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.4.2",
+    "ts-jest": "^29.4.11"
   }
 }

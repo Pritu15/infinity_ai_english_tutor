@@ -1,6 +1,6 @@
 import type { Request, Response } from "express";
 import { StatusCodes } from "http-status-codes";
-import { v4 as uuid } from "uuid";
+import { randomUUID } from "node:crypto";
 import { environment } from "../config/environment.js";
 import { HttpError } from "../middleware/error.middleware.js";
 import { emailPasswordSchema, refreshTokenSchema } from "../schemas/auth.schemas.js";
@@ -27,7 +27,8 @@ export class AuthController {
 
   refresh = async (request: Request, response: Response): Promise<void> => {
     const input = refreshTokenSchema.parse(request.body ?? {});
-    const cookieToken = this.readRefreshCookie(request);
+    // BUGFIX: allow API clients to refresh with a body token without also requiring the browser cookie.
+    const cookieToken = this.readRefreshCookie(request, !input.refreshToken);
     const authResult = await this.authService.refresh(input.refreshToken ?? cookieToken);
 
     this.sendAuthResult(response, StatusCodes.OK, authResult);
@@ -41,7 +42,8 @@ export class AuthController {
   };
 
   googleRedirect = (_request: Request, response: Response): void => {
-    response.redirect(this.authService.googleAuthUrl(uuid()));
+    // BUGFIX: use Node's native UUID generator so Jest does not load uuid's ESM-only build.
+    response.redirect(this.authService.googleAuthUrl(randomUUID()));
   };
 
   googleCallback = async (request: Request, response: Response): Promise<void> => {

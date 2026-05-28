@@ -1,6 +1,5 @@
-import type { Config } from "jest";
-
-const config: Config = {
+/** @type {import("jest").Config} */
+const config = {
   extensionsToTreatAsEsm: [".ts"],
   moduleNameMapper: {
     "^(\\.{1,2}/.*)\\.js$": "$1"
@@ -11,4 +10,4 @@ const config: Config = {
   testMatch: ["<rootDir>/test/**/*.test.ts"]
 };
 
-export default config;
+module.exports = config;
